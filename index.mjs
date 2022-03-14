@@ -1,14 +1,18 @@
 import { loadStdlib, ask } from '@reach-sh/stdlib';
 import * as backend from './build/index.main.mjs';
 const stdlib = loadStdlib();
+// imports the standard library
 
 const isAlice = await ask.ask(
   `Are you Alice?`,
   ask.yesno
 );
+// asks a y/n response for if p1 is Alice (automatically assumes Bob if not)
+
 const who = isAlice ? 'Alice' : 'Bob';
 
 console.log(`Starting Rock, Paper, Scissors! as ${who}`);
+// defines the const who and writes who you play as
 
 let acc = null;
 const createAcc = await ask.ask(
@@ -37,12 +41,14 @@ if (isAlice) {
   );
   ctc = acc.contract(backend, info);
 }
+// makes an account on dev-net
 
 const fmt = (x) => stdlib.formatCurrency(x, 4);
 const getBalance = async () => fmt(await stdlib.balanceOf(acc));
 
 const before = await getBalance();
 console.log(`Your balance is ${before}`);
+// displays balance in network tokens
 
 const interact = { ...stdlib.hasRandom };
 
@@ -50,6 +56,7 @@ interact.informTimeout = () => {
   console.log(`There was a timeout.`);
   process.exit(1);
 };
+// times out if too slow to respond
 
 if (isAlice) {
   const amt = await ask.ask(
@@ -69,6 +76,7 @@ if (isAlice) {
     }
   };
 }
+// if you're p1 (Alice), ask how much to wager. Otherwise, ask if you accept the wager.
 
 const HAND = ['Rock', 'Paper', 'Scissors'];
 const HANDS = {
@@ -76,6 +84,7 @@ const HANDS = {
   'Paper': 1, 'P': 1, 'p': 1,
   'Scissors': 2, 'S': 2, 's': 2,
 };
+// defines the possible hands and their entry into the console
 
 interact.getHand = async () => {
   const hand = await ask.ask(`What hand will you play?`, (x) => {
@@ -88,16 +97,19 @@ interact.getHand = async () => {
   console.log(`You played ${HAND[hand]}`);
   return hand;
 };
+// accepts valid hand values and asks what you'll play
 
 const OUTCOME = ['Bob wins', 'Draw', 'Alice wins'];
 interact.seeOutcome = async (outcome) => {
   console.log(`The outcome is: ${OUTCOME[outcome]}`);
 };
+// displays the winner based on calculation in backend
 
 const part = isAlice ? ctc.p.Alice : ctc.p.Bob;
 await part(interact);
 
 const after = await getBalance();
 console.log(`Your balance is now ${after}`);
+// displays current balance
 
 ask.done();
